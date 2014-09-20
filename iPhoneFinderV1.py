@@ -1,9 +1,7 @@
 import urllib2
 import json
 
-
-# edit your zipcode below as a string
-zipcode = "02127"
+''' Pass your zipcode as a string argument to the functions below'''
 
 iphones = {
 	"iPhone 6 Silver 16GB T-Mobile": "MG552",
@@ -35,7 +33,7 @@ unusedDict = {
 	"iPhone 5S Space Gray 32GB SIM-free": "ME299",
 }
 
-def iphoneFinder():
+def iphoneFinder(zipcode):
 	'''Runs the iphones dictionary for a certain zipcode. This function only prints if an iphone value is found in stock'''
 
 	dummy = False
@@ -51,7 +49,7 @@ def iphoneFinder():
 	if dummy == False:
 		print "Sorry, no iPhones are available at this time"
 
-def iphoneReport():
+def iphoneReport(zipcode):
 	'''Runs the iphones dictionary for a certain zipcode. This function prints the nearby inventory for each key/value in the dictionary'''
 
 	for i in iphones.keys():
