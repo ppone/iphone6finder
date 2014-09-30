@@ -5,9 +5,11 @@ import json
 import sys
 from pync import Notifier
 import time
+import datetime
 
 ''' Pass your zipcode as a string argument to the functions below'''
 
+DELAY = 60
 APPLE_STORE_US = "http://store.apple.com/us/retailStore/availabilitySearch?parts.0="
 
 iphones = {
@@ -38,8 +40,8 @@ def iphoneFinder(zipcode,phone):
 
 	found = False
         target = APPLE_STORE_US + str(iphones[phone]["part"]) + "LL%2FA&zip=" + zipcode
-#        print("finding => " + iphones[phone]["description"])
-#        print(target)
+        print("finding => " + iphones[phone]["description"] + ", date => " + str(datetime.datetime.utcnow()) + " UTC")
+        print("url => " + target)
         json_input = urllib2.urlopen(target)
         decoded = json.load(json_input)
         s = ""
@@ -56,8 +58,8 @@ def iphoneFinder(zipcode,phone):
 while True:
         for zipcode in sys.argv[1:len(sys.argv)]:
                 if iphoneFinder(zipcode,14):
-                        print("phone found!")
-                        time.sleep(65)
+                        print("Phone found!")
+        time.sleep(DELAY)
                         
 
 
