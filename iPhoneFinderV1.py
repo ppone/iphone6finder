@@ -1,60 +1,63 @@
+#!/usr/local/bin/python
+
 import urllib2
 import json
+import sys
+from pync import Notifier
+import time
 
 ''' Pass your zipcode as a string argument to the functions below'''
 
+APPLE_STORE_US = "http://store.apple.com/us/retailStore/availabilitySearch?parts.0="
+
 iphones = {
-	"iPhone 6 Silver 16GB T-Mobile": "MG552",
-	"iPhone 6 Silver 64GB T-Mobile": "MG5C2",
-	"iPhone 6 Silver 128GB T-Mobile": "MG582",
-	"iPhone 6 Gold 16GB T-Mobile": "MG562",
-	"iPhone 6 Gold 64GB T-Mobile": "MG5D2",
-	"iPhone 6 Gold 128GB T-Mobile": "MG592",
-	"iPhone 6 Space Gray 16GB T-Mobile": "MG542",
-	"iPhone 6 Space Gray 64GB T-Mobile": "MG5A2",
-	"iPhone 6 Space Gray 128GB T-Mobile": "MG572",
-	"iPhone 6+ Silver 16GB T-Mobile": "MGC02",
-	"iPhone 6+ Silver 64GB T-Mobile": "MGC62",
-	"iPhone 6+ Silver 128GB T-Mobile": "MGC32",
-	"iPhone 6+ Gold 16GB T-Mobile": "MGC12",
-	"iPhone 6+ Gold 64GB T-Mobile": "MGC72",
-	"iPhone 6+ Gold 128GB T-Mobile": "MGC42",
-	"iPhone 6+ Space Gray 16GB T-Mobile": "MGAX2",
-	"iPhone 6+ Space Gray 64GB T-Mobile": "MGC52",
-	"iPhone 6+ Space Gray 128GB T-Mobile": "MGC22",
+        1:{"description":"iPhone 6 Silver 16GB T-Mobile", "part": "MG552"},
+        2:{"description":"iPhone 6 Silver 64GB T-Mobile", "part": "MG5C2"},
+        3:{"description":"iPhone 6 Silver 128GB T-Mobile", "part": "MG582"},
+        4:{"description":"iPhone 6 Gold 16GB T-Mobile", "part": "MG562"},
+        5:{"description":"iPhone 6 Gold 64GB T-Mobile", "part": "MG5D2"},
+        6:{"description":"iPhone 6 Gold 128GB T-Mobile", "part": "MG592"},
+        7:{"description":"iPhone 6 Space Gray 16GB T-Mobile", "part": "MG542"},
+        8:{"description":"iPhone 6 Space Gray 64GB T-Mobile", "part": "MG5A2"},
+        9:{"description":"iPhone 6 Space Gray 128GB T-Mobile", "part": "MG572"},
+        10:{"description":"iPhone 6+ Silver 16GB T-Mobile", "part": "MGC02"},
+        11:{"description":"iPhone 6+ Silver 64GB T-Mobile", "part": "MGC62"},
+        12:{"description":"iPhone 6+ Silver 128GB T-Mobile", "part": "MGC32"},
+        13:{"description":"iPhone 6+ Gold 16GB T-Mobile", "part": "MGC12"},
+        14:{"description":"iPhone 6+ Gold 64GB T-Mobile", "part": "MGC72"},
+        15:{"description":"iPhone 6+ Gold 128GB T-Mobile", "part": "MGC42"},
+        16:{"description":"iPhone 6+ Space Gray 16GB T-Mobile", "part": "MGAX2"},
+        17:{"description":"iPhone 6+ Space Gray 64GB T-Mobile", "part": "MGC52"},
+        18:{"description":"iPhone 6+ Space Gray 128GB T-Mobile", "part": "MGC22"},
+        19:{"description":"iPhone 6 Gold 64GB Verizon", "part": "MG652"},
+        20:{"description":"iPhone 6+ Gold 64GB Verizon", "part": "MGCU2"}
 }
 
-unusedDict = {
-	"iPhone 5S Silver 16GB SIM-free": "ME297",
-	"iPhone 5S Silver 32GB SIM-free": "ME300",
-	"iPhone 5S Gold 16GB SIM-free": "ME298",
-	"iPhone 5S Gold 32GB SIM-free": "ME301",
-	"iPhone 5S Space Gray 16GB SIM-free": "ME296",
-	"iPhone 5S Space Gray 32GB SIM-free": "ME299",
-}
-
-def iphoneFinder(zipcode):
+def iphoneFinder(zipcode,phone):
 	'''Runs the iphones dictionary for a certain zipcode. This function only prints if an iphone value is found in stock'''
 
-	dummy = False
-	for i in iphones.keys():
-		target = "http://store.apple.com/us/retailStore/availabilitySearch?parts.0=" + str(iphones[i]) + "LL%2FA&zip=" + zipcode
-		json_input = urllib2.urlopen(target)
-		decoded = json.load(json_input)
-		for j in decoded["body"]["stores"]:
-			if j["partsAvailability"][str(iphones[i]) + "LL/A"]["pickupSearchQuote"] == "Available today":
-				dummy = True
-				print str(i) + " - " + j["partsAvailability"][str(iphones[i]) + "LL/A"]["pickupSearchQuote"] + " - " + str(j["storeName"])
+	found = False
+        target = APPLE_STORE_US + str(iphones[phone]["part"]) + "LL%2FA&zip=" + zipcode
+#        print("finding => " + iphones[phone]["description"])
+#        print(target)
+        json_input = urllib2.urlopen(target)
+        decoded = json.load(json_input)
+        s = ""
+        for j in decoded["body"]["stores"]:
+                if j["partsAvailability"][iphones[phone]["part"] + "LL/A"]["pickupSearchQuote"] == "Available today":
+                        found = True
+                        s =  str(iphones[phone]["description"]) + " - " + j["partsAvailability"][str(iphones[phone]["part"]) + "LL/A"]["pickupSearchQuote"] + " - " + str(j["storeName"])
+                        Notifier.notify(s)
+                        print(s)
+        return found
+                                
 
-	if dummy == False:
-		print "Sorry, no iPhones are available at this time"
 
-def iphoneReport(zipcode):
-	'''Runs the iphones dictionary for a certain zipcode. This function prints the nearby inventory for each key/value in the dictionary'''
+while True:
+        for zipcode in sys.argv[1:len(sys.argv)]:
+                if iphoneFinder(zipcode,14):
+                        print("phone found!")
+                        time.sleep(65)
+                        
 
-	for i in iphones.keys():
-		target = "http://store.apple.com/us/retailStore/availabilitySearch?parts.0=" + str(iphones[i]) + "LL%2FA&zip=" + zipcode
-		json_input = urllib2.urlopen(target)
-		decoded = json.load(json_input)
-		for j in decoded["body"]["stores"]:
-			print str(i) + " - " + j["partsAvailability"][str(iphones[i]) + "LL/A"]["pickupSearchQuote"] + " - " + str(j["storeName"])
+
